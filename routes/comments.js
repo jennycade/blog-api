@@ -7,11 +7,11 @@ const Comment = require('../models/comment');
 router.get('/', async (req, res, next) => {
   try {
     const comments = await Comment
-    .find()
-    .sort('-createdAt')
-    .exec();
+      .find()
+      .sort('-createdAt')
+      .exec();
 
-  res.json(comments);
+    res.json(comments);
   } catch (err) {
     return next(err);
   }

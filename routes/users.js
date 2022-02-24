@@ -7,9 +7,9 @@ const User = require('../models/user');
 router.get('/', async (req, res, next) => {
   try {
     const users = await User
-    .find('displayName createdAt')
-    .sort('-createdAt')
-    .exec();
+      .find('displayName createdAt')
+      .sort('-createdAt')
+      .exec();
 
     res.json(users);
   } catch (err) {
