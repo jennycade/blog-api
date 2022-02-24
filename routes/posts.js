@@ -1,17 +1,17 @@
 var express = require('express');
 var router = express.Router();
 
-const User = require('../models/user');
+const Post = require('../models/post');
 
-/* GET users listing. */
+// get all posts
 router.get('/', async (req, res, next) => {
   try {
-    const users = await User
-    .find('displayName createdAt')
+    const posts = await Post
+    .find({ postStatus: 'published'})
     .sort('-createdAt')
     .exec();
 
-    res.json(users);
+    res.json(posts);
   } catch (err) {
     return next(err);
   }

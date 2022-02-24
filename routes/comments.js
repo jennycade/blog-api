@@ -1,17 +1,17 @@
 var express = require('express');
 var router = express.Router();
 
-const User = require('../models/user');
+const Comment = require('../models/comment');
 
-/* GET users listing. */
+/* GET comments listing. */
 router.get('/', async (req, res, next) => {
   try {
-    const users = await User
-    .find('displayName createdAt')
+    const comments = await Comment
+    .find()
     .sort('-createdAt')
     .exec();
 
-    res.json(users);
+  res.json(comments);
   } catch (err) {
     return next(err);
   }
