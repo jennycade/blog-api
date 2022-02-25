@@ -22,13 +22,14 @@ router.get('/', async (req, res, next) => {
 router.get('/:postId', async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.postId)
-      .populate('author') // TODO: hide password!
+      .populate('author', '-password')
       .exec();
     if (post.postStatus === 'published') {
       res.json(post);
     } else {
       // TODO: check that user has permission to view draft
       // admin and post author
+      res.json(post);
     }
   } catch (err) {
     return next(err);

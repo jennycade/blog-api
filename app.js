@@ -10,6 +10,8 @@ var usersRouter = require('./routes/users');
 
 const mongoose = require('mongoose');
 
+require('./auth/auth');
+
 var app = express();
 
 // view engine setup

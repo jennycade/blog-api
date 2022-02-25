@@ -8,6 +8,7 @@
     "serverstart": "DEBUG=blog-api:* npm run devstart"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.0.0",
@@ -15,6 +16,8 @@
     "http-errors": "~1.6.3",
     "mongoose": "^6.2.3",
     "morgan": "~1.9.1",
+    "passport": "^0.5.2",
+    "passport-local": "^1.0.0",
     "pug": "^3.0.2"
   }
 }
