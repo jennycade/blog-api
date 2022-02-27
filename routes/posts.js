@@ -24,7 +24,8 @@ router.get('/', async (req, res, next) => {
 // post a post!
 router.post('/', 
   passport.authenticate('jwt', {session: false}),
-  // TODO: validate title, text, postStatus
+
+  // validate and sanitize
   body('title')
     .exists().withMessage('Title required')
     .escape().trim(),
@@ -34,6 +35,7 @@ router.post('/',
   body('postStatus')
     .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
     .escape(),
+
   async (req, res, next) => {
     try {
       // check for author role
@@ -59,22 +61,43 @@ router.post('/',
 );
 
 // get one post
-router.get('/:postId', async (req, res, next) => {
-  try {
-    const post = await Post.findById(req.params.postId)
-      .populate('author', '-password')
-      .exec();
-    if (post.postStatus === 'published') {
-      res.json(post);
-    } else {
-      // TODO: check that user has permission to view draft
-      // admin and post author
-      res.json(post);
+router.get('/:postId',
+  async (req, res, next) => {
+    try {
+      const post = await Post.findById(req.params.postId)
+        .populate('author', '-password')
+        .exec();
+      if (post.postStatus === 'published') {
+        res.json(post);
+      } else {
+        // need to authenticate. pass the post along.
+        res.locals.post = post;
+        next(null);
+      }
+    } catch (err) {
+      return next(err);
     }
-  } catch (err) {
-    return next(err);
+  },
+  // viewing a draft post requires validation
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    try {
+      // admin or post author
+      if (
+        req.user.roles.includes('admin') ||
+        req.user._id === res.locals.post.author._id.toString()
+      ) {
+        res.json(res.locals.post);
+      } else {
+        const err = new Error('You do not have permission to view this post');
+        err.status = 403;
+        throw err;
+      }
+    } catch (err) {
+      return next(err);
+    }
   }
-});
+);
 
 // get comments for post
 router.get('/:postId/comments', async (req, res, next) => {
