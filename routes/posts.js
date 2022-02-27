@@ -150,8 +150,34 @@ router.put('/:postId',
       return next(err);
     }
   },
+);
 
-  
+// update post
+router.delete('/:postId',
+
+  passport.authenticate('jwt', {session: false}),
+
+  async (req, res, next) => {
+    try {
+      // find the post
+      const post = await Post.findById(req.params.postId).exec();
+      // check - admin or post author?
+      if (
+        req.user.roles.includes('admin') ||
+        req.user._id === post.author.toString()
+      ) {
+        // allow deletion
+        await post.remove();
+        res.json(post);
+      } else {
+        const err = new Error('You do not have permission to delete this post');
+        err.status = 403;
+        throw err;
+      }
+    } catch (err) {
+      return next(err);
+    }
+  },
 );
 
 module.exports = router;
