@@ -19,9 +19,9 @@ passport.use(
       try {
         // construct roles
         const roles = [];
-        if (req.headers.isadmin) roles.push('admin');
-        if (req.headers.isauthor) roles.push('author');
-        if (req.headers.iscommenter) roles.push('commenter');
+        if (req.headers.isadmin === 'true') roles.push('admin');
+        if (req.headers.isauthor === 'true') roles.push('author');
+        if (req.headers.iscommenter === 'true') roles.push('commenter');
 
         const user = await User.create(
           {
