@@ -3,6 +3,7 @@ var router = express.Router();
 
 const Post = require('../models/post');
 const Comment = require('../models/comment');
+const passport = require('passport');
 
 // get all posts
 router.get('/', async (req, res, next) => {
@@ -45,6 +46,14 @@ router.get('/:postId/comments', async (req, res, next) => {
   } catch (err) {
     return next(err);
   }
-})
+});
+
+// create post
+router.post('/', 
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    res.json('You made it');
+  }
+);
 
 module.exports = router;

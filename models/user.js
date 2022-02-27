@@ -14,7 +14,6 @@ const UserSchema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false,
     },
     displayName: {
       type: String,
@@ -44,11 +43,10 @@ UserSchema.pre('save',
   }
 );
 
-UserSchema.method('isValidPassword',
-  async function(password) {
-    const compare = await bcrypt(password, user.password);
-    return compare;
-  }
-);
+UserSchema.methods.isValidPassword = async function(password) {
+  const user = this;
+  const compare = await bcrypt.compare(password, user.password);
+  return compare;
+};
 
 module.exports = mongoose.model('User', UserSchema)

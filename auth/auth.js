@@ -1,5 +1,8 @@
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
+const JWTStrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;
+require('dotenv').config();
 
 const User = require('../models/user');
 
@@ -62,4 +65,21 @@ passport.use(
       }
     }
   )
-)
+);
+
+// authenticate with JWT
+passport.use(
+  new JWTStrategy(
+    {
+      secretOrKey: process.env.TOKEN_SECRET,
+      jwtFromRequest: ExtractJWT.fromUrlQueryParameter('secret_token'),
+    },
+    async (token, done) => {
+      try {
+        return done(null, token.user);
+      } catch (err) {
+        done(err);
+      }
+    }
+  )
+);
