@@ -1,9 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const passport = require('passport');
+const { body } = require('express-validator');
 
 const Post = require('../models/post');
 const Comment = require('../models/comment');
-const passport = require('passport');
 
 // get all posts
 router.get('/', async (req, res, next) => {
@@ -24,6 +25,15 @@ router.get('/', async (req, res, next) => {
 router.post('/', 
   passport.authenticate('jwt', {session: false}),
   // TODO: validate title, text, postStatus
+  body('title')
+    .exists().withMessage('Title required')
+    .escape().trim(),
+  body('Text')
+    .exists().withMessage('Text required')
+    .escape().trim(),
+  body('postStatus')
+    .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
+    .escape(),
   async (req, res, next) => {
     try {
       // check for author role
