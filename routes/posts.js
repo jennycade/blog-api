@@ -113,7 +113,16 @@ router.get('/:postId/comments', async (req, res, next) => {
 // update post
 router.put('/:postId', 
 
-  // TODO: validate and sanitize
+  // validate and sanitize
+  body('title')
+    .exists().withMessage('Title required')
+    .escape().trim(),
+  body('text')
+    .exists().withMessage('Text required')
+    .escape().trim(),
+  body('postStatus')
+    .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
+    .escape(),
 
   passport.authenticate('jwt', {session: false}),
 
