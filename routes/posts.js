@@ -110,12 +110,39 @@ router.get('/:postId/comments', async (req, res, next) => {
   }
 });
 
-// create post
-router.post('/', 
-  passport.authenticate('jwt', { session: false }),
+// update post
+router.put('/:postId', 
+
+  // TODO: validate and sanitize
+
+  passport.authenticate('jwt', {session: false}),
+
   async (req, res, next) => {
-    res.json('You made it');
-  }
+    try {
+      // find the post
+      const post = await Post.findById(req.params.postId).exec();
+      // check - admin or post author?
+      if (
+        req.user.roles.includes('admin') ||
+        req.user._id === post.author.toString()
+      ) {
+        // allow the update
+        post.title = req.body.title;
+        post.text = req.body.text;
+        post.postStatus = req.body.postStatus;
+        const updatedPost = await post.save();
+        res.json(updatedPost);
+      } else {
+        const err = new Error('You do not have permission to update the post');
+        err.status = 403;
+        throw err;
+      }
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  
 );
 
 module.exports = router;
