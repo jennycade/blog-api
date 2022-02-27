@@ -19,7 +19,6 @@ passport.use(
         if (req.headers.isadmin) roles.push('admin');
         if (req.headers.isauthor) roles.push('author');
         if (req.headers.iscommenter) roles.push('commenter');
-        if (req.headers.isreader) roles.push('reader');
 
         const user = await User.create(
           {
