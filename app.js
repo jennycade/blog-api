@@ -9,6 +9,7 @@ require('dotenv').config();
 var postsRouter = require('./routes/posts');
 var usersRouter = require('./routes/users');
 const indexRouter = require('./routes/index');
+const commentsRouter = require('./routes/comments');
 
 const mongoose = require('mongoose');
 
@@ -37,6 +38,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // routes
 app.use('/posts', postsRouter);
 app.use('/users', usersRouter);
+app.use('/comments', commentsRouter);
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
