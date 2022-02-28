@@ -6,6 +6,8 @@ const { body } = require('express-validator');
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 
+const postController = require('../controllers/postController');
+
 // get all posts
 router.get('/', async (req, res, next) => {
   try {
@@ -25,16 +27,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', 
   passport.authenticate('jwt', {session: false}),
 
-  // validate and sanitize
-  body('title')
-    .exists().withMessage('Title required')
-    .escape().trim(),
-  body('Text')
-    .exists().withMessage('Text required')
-    .escape().trim(),
-  body('postStatus')
-    .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
-    .escape(),
+  postController.validate(),
 
   async (req, res, next) => {
     try {
@@ -114,15 +107,7 @@ router.get('/:postId/comments', async (req, res, next) => {
 router.put('/:postId', 
 
   // validate and sanitize
-  body('title')
-    .exists().withMessage('Title required')
-    .escape().trim(),
-  body('text')
-    .exists().withMessage('Text required')
-    .escape().trim(),
-  body('postStatus')
-    .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
-    .escape(),
+  postController.validate(),
 
   passport.authenticate('jwt', {session: false}),
 
@@ -168,7 +153,7 @@ router.delete('/:postId',
       ) {
         // allow deletion
         await post.remove();
-        res.json(post);
+        res.status(204).send();
       } else {
         const err = new Error('You do not have permission to delete this post');
         err.status = 403;
