@@ -1,6 +1,6 @@
 const { body, validationResult } = require('express-validator');
 
-exports.validate = (req, res, next) => {
+exports.validate = () => {
   return [
     body('text')
       .exists({checkFalsy: true}).withMessage('Text required')
@@ -8,9 +8,8 @@ exports.validate = (req, res, next) => {
       
     body('author')
       .exists({checkFalsy: true}).withMessage('Author required')
-      .equals(req.user._id).withMessage('Comment author must be current authenticated user')
+      .custom((value, { req }) => value === req.user._id).withMessage('Comment author must be current authenticated user')
       .trim().escape(),
-      // TODO: only authenticated user can be the author
     
     body('post')
       .exists({checkFalsy: true}).withMessage('Post required')

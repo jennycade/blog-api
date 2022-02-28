@@ -4,7 +4,7 @@ const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
 const Comment = require('../models/comment');
-// const commentController = require('../controllers/commentController');
+const commentController = require('../controllers/commentController');
 
 /* GET comments listing. */
 router.get('/', async (req, res, next) => {
@@ -24,35 +24,7 @@ router.get('/', async (req, res, next) => {
 router.post('/',
   passport.authenticate('jwt', {session: false}),
 
-  // (req, res, next) => commentController.validate(req, res, next),
-  body('text')
-    .exists({checkFalsy: true}).withMessage('Text required')
-    .trim().escape(),
-    
-  body('author')
-    .exists({checkFalsy: true}).withMessage('Author required')
-    .custom((value, { req }) => value === req.user._id).withMessage('Comment author must be current authenticated user')
-    .trim().escape(),
-  
-  body('post')
-    .exists({checkFalsy: true}).withMessage('Post required')
-    .trim().escape(),
-
-  (req, res, next) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const errorMessages = errors.array().map(fieldError => fieldError.msg).join(', ');
-  
-        const err = new Error(`Validation errors: ${errorMessages}`);
-        err.status = 400;
-        throw err;
-      }
-      return next();
-    } catch (err) {
-      return next(err);
-    }
-  },
+  commentController.validate(),
 
   async (req, res, next) => {
     try {
