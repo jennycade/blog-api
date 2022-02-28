@@ -67,4 +67,34 @@ router.put('/:commentId',
   }
 );
 
+// delete a comment
+router.delete('/:commentId',
+  passport.authenticate('jwt', {session: false}),
+
+  async (req, res, next) => {
+    try {
+      // check user: comment author OR admin
+      const comment = await Comment.findById(req.params.commentId).exec();
+      if (!comment) {
+        const err = new Error('Comment not found');
+        err.status = 404;
+        throw err;
+      }
+      if (!req.user.roles.includes('admin') &&
+        req.user._id !== comment.author.toString()
+      ) {
+        const err = new Error('You are not authorized to delete this comment');
+        err.status = 403;
+        throw err;
+      } else {
+        // delete it!
+        await comment.remove();
+        res.status(204).send(); // success, no body
+      }
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 module.exports = router;

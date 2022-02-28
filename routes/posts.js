@@ -152,7 +152,7 @@ router.put('/:postId',
   },
 );
 
-// update post
+// delete post
 router.delete('/:postId',
 
   passport.authenticate('jwt', {session: false}),
