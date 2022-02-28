@@ -4,7 +4,7 @@ const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
 const Comment = require('../models/comment');
-const commentController = require('../controllers/commentController');
+// const commentController = require('../controllers/commentController');
 
 /* GET comments listing. */
 router.get('/', async (req, res, next) => {
@@ -24,13 +24,14 @@ router.get('/', async (req, res, next) => {
 router.post('/',
   passport.authenticate('jwt', {session: false}),
 
-  // commentController.validate(),
+  // (req, res, next) => commentController.validate(req, res, next),
   body('text')
     .exists({checkFalsy: true}).withMessage('Text required')
     .trim().escape(),
     
   body('author')
     .exists({checkFalsy: true}).withMessage('Author required')
+    .custom((value, { req }) => value === req.user._id).withMessage('Comment author must be current authenticated user')
     .trim().escape(),
   
   body('post')
