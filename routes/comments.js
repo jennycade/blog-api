@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { body, validationResult } = require('express-validator');
 
 const Comment = require('../models/comment');
 const commentController = require('../controllers/commentController');
@@ -35,6 +34,33 @@ router.post('/',
         post: req.body.post,
       });
       res.json(comment);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// update a comment
+router.put('/:commentId',
+  passport.authenticate('jwt', {session: false}),
+
+  commentController.validate(),
+
+  async (req, res, next) => {
+    try {
+      // check to make sure user is original author
+      const comment = await Comment.findById(req.params.commentId).exec();
+      if (comment.author.toString() !== req.user._id) {
+        const err = new Error('Only the comment author can update this comment');
+        err.status = 403;
+        throw err;
+      }
+      // update
+      comment.text = req.body.text;
+      comment.post = req.body.post;
+      // don't allow changing author
+      const updatedComment = await comment.save();
+      res.json(updatedComment);
     } catch (err) {
       return next(err);
     }
