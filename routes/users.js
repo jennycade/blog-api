@@ -3,6 +3,7 @@ const passport = require('passport');
 var router = express.Router();
 
 const User = require('../models/user');
+const userController = require('../controllers/userController');
 
 /* GET users listing. */
 router.get('/',
@@ -31,7 +32,7 @@ router.get('/',
 
 // create new user, a.k.a. sign up
 router.post('/',
-  // TODO: validate and sanitize?
+  userController.validate(),
   passport.authenticate('signup', {session: false}),
   async (req, res, next) => {
     res.json({
