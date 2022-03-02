@@ -56,10 +56,21 @@ router.get('/:userId',
       } else {
         // manually log in
         req.login(user, {session: false}, next);
-        next();
       }
     })(req, res, next);
   },
+  // (req, res, next) => {
+  //   try {
+  //     passport.authenticate('jwt', {session: false, failWithError: true})(req, res, next);
+  //   } catch (err) {
+  //     if (err.status === 401) {
+  //       next();
+  //     } else {
+  //       return next(err);
+  //     }
+  //   }
+  // },
+
   async (req, res, next) => {
     try {
       // get user
