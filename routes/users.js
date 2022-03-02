@@ -43,6 +43,49 @@ router.post('/',
 );
 
 // TODO: get one user
+router.get('/:userId',
+  userController.validateObjectId,
+  // authentication with callback
+  // TODO: move this to auth.js
+  (req, res, next) => {
+    passport.authenticate('jwt', {session: false}, (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        // not logged in
+        next();
+      } else {
+        // manually log in
+        req.login(user, {session: false}, next);
+        next();
+      }
+    })(req, res, next);
+  },
+  async (req, res, next) => {
+    try {
+      // get user
+      const user = await User.findById(req.params.userId).exec();
+      
+      // 404 user not found
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+      }
+      const fields = ['displayName', 'roles'];
+      // if logged in AND admin or self: retrieve username too
+      // TODO
+
+      const userToReturn = {
+        _id: user._id,
+        displayName: user.displayName,
+        roles: user.roles,
+      };
+      res.json(userToReturn);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 // update
 router.put('/:userId',
