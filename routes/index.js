@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
-/* GET users listing. */
+// login
 router.post('/login', async (req, res, next) => {
   passport.authenticate(
     'login',
@@ -40,5 +40,6 @@ router.post('/login', async (req, res, next) => {
   )(req, res, next);
 });
 
+// TODO: logout
 
 module.exports = router;

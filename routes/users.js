@@ -42,4 +42,50 @@ router.post('/',
   }
 );
 
+// TODO: Put
+router.put('/:userId',
+  passport.authenticate('jwt', {session: false}),
+  userController.validate(),
+  async (req, res, next) => {
+    try { 
+      // allow signed in user OR admin to update user
+      const user = await User.findById(req.params.userId).exec();
+      
+      // 404 user not found
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+      }
+      
+      // 403 no permission
+      if (req.user._id !== user._id.toString() &&
+        !req.user.roles.includes('admin')
+      ) {
+        const err = new Error('You do not have permission to update this user');
+        err.status = 403;
+        throw err;
+      }
+
+      // update permitted
+      user.username = req.body.username;
+      user.password = req.body.password;
+      user.displayName = req.body.displayname;
+      const roles = [];
+      if (req.body.iscommenter === 'true') roles.push('commenter');
+      if (req.body.isauthor === 'true') roles.push('author');
+      if (req.body.isadmin === 'true') roles.push('admin');
+      user.roles = roles;
+
+      const updatedUser = await user.save();
+      res.json(updatedUser);
+
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// TODO: DELETE
+
 module.exports = router;

@@ -15,3 +15,5 @@ exports.throwValidationErrors = (req, res, next) => {
     return next(err);
   }
 };
+
+// TODO: Function to throw 404 when casting id to ObjectId fails.
