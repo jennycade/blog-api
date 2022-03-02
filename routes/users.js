@@ -4,6 +4,7 @@ var router = express.Router();
 
 const User = require('../models/user');
 const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 /* GET users listing. */
 router.get('/',
@@ -42,23 +43,10 @@ router.post('/',
   }
 );
 
-// TODO: get one user
+// get one user
 router.get('/:userId',
   userController.validateObjectId,
-  // authentication with callback
-  // TODO: move this to auth.js
-  (req, res, next) => {
-    passport.authenticate('jwt', {session: false}, (err, user, info) => {
-      if (err) return next(err);
-      if (!user) {
-        // not logged in
-        next();
-      } else {
-        // manually log in
-        req.login(user, {session: false}, next);
-      }
-    })(req, res, next);
-  },
+  authController.authenticateAllowNonuser,
 
   async (req, res, next) => {
     try {
