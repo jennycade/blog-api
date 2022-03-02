@@ -59,17 +59,6 @@ router.get('/:userId',
       }
     })(req, res, next);
   },
-  // (req, res, next) => {
-  //   try {
-  //     passport.authenticate('jwt', {session: false, failWithError: true})(req, res, next);
-  //   } catch (err) {
-  //     if (err.status === 401) {
-  //       next();
-  //     } else {
-  //       return next(err);
-  //     }
-  //   }
-  // },
 
   async (req, res, next) => {
     try {
@@ -85,12 +74,21 @@ router.get('/:userId',
       const fields = ['displayName', 'roles'];
       // if logged in AND admin or self: retrieve username too
       // TODO
-
+      if (req.user) {
+        if (
+          req.user.roles.includes('admin') ||
+          req.user._id === user._id.toString()
+        ) {
+          fields.push('username');
+        }
+      }
       const userToReturn = {
         _id: user._id,
-        displayName: user.displayName,
-        roles: user.roles,
       };
+      fields.forEach(field => {
+        userToReturn[field] = user[field];
+      });
+      
       res.json(userToReturn);
     } catch (err) {
       return next(err);
