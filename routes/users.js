@@ -42,7 +42,9 @@ router.post('/',
   }
 );
 
-// TODO: Put
+// TODO: get one user
+
+// update
 router.put('/:userId',
   userController.validateObjectId,
   passport.authenticate('jwt', {session: false}),
