@@ -23,4 +23,15 @@ exports.validate = () => {
 
     validationController.throwValidationErrors,
   ]
+};
+
+exports.validateObjectId = (req, res, next) => {
+  const isValid = validationController.validateObjectId(req.params.userId);
+  if (!isValid) {
+    const err = new Error('Invalid user id');
+    err.status = 400;
+    return next(err);
+  } else {
+    next();
+  }
 }

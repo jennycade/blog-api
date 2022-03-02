@@ -16,4 +16,7 @@ exports.throwValidationErrors = (req, res, next) => {
   }
 };
 
-// TODO: Function to throw 404 when casting id to ObjectId fails.
+exports.validateObjectId = (paramId) => {
+  const objIdPattern = /^[a-f\d]{24}$/i;
+  return objIdPattern.test(paramId);
+}

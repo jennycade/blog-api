@@ -44,6 +44,7 @@ router.post('/',
 
 // TODO: Put
 router.put('/:userId',
+  userController.validateObjectId,
   passport.authenticate('jwt', {session: false}),
   userController.validate(),
   async (req, res, next) => {
