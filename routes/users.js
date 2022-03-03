@@ -47,33 +47,25 @@ router.post('/',
 router.get('/:userId',
   userController.validateObjectId,
   authController.authenticateAllowNonuser,
+  userController.getOne,
+  userController.checkForSelf,
+  authController.checkForAdmin,
 
   async (req, res, next) => {
     try {
-      // get user
-      const user = await User.findById(req.params.userId).exec();
-      
-      // 404 user not found
-      if (!user) {
-        const err = new Error('User not found');
-        err.status = 404;
-        throw err;
-      }
       const fields = ['displayName', 'roles']; // TODO: createdAt, what else?
       // if logged in AND admin or self: retrieve username too
-      if (req.user) {
-        if (
-          req.user.roles.includes('admin') ||
-          req.user._id === user._id.toString()
-        ) {
-          fields.push('username');
-        }
+      if (
+        res.locals.currentUserIsAdmin ||
+        res.locals.currentUserIsSelf
+      ) {
+        fields.push('username');
       }
       const userToReturn = {
-        _id: user._id,
+        _id: res.locals.user._id,
       };
       fields.forEach(field => {
-        userToReturn[field] = user[field];
+        userToReturn[field] = res.locals.user[field];
       });
       
       res.json(userToReturn);

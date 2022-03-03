@@ -56,7 +56,11 @@ exports.getOne = async (req, res, next) => {
 
 exports.checkForSelf = (req, res, next) => {
   try {
-    res.locals.currentUserIsSelf = (req.user._id === res.locals.user._id.toString());
+    let result = false;
+    if (req.user) {
+      result = (req.user._id === res.locals.user._id.toString());
+    }
+    res.locals.currentUserIsSelf = result;
     next();
   } catch (err) {
     return next(err);
