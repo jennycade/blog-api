@@ -1,4 +1,5 @@
 const { body } = require('express-validator');
+const User = require('../models/user');
 
 const validationController = require('./validationController');
 
@@ -33,5 +34,31 @@ exports.validateObjectId = (req, res, next) => {
     return next(err);
   } else {
     next();
+  }
+}
+
+exports.getOne = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.userId).exec();
+    
+    // 404 user not found
+    if (!user) {
+      const err = new Error('User not found');
+      err.status = 404;
+      throw err;
+    }
+    res.locals.user = user;
+    next();
+  } catch (err) {
+    return next(err)
+  }
+}
+
+exports.checkForSelf = (req, res, next) => {
+  try {
+    res.locals.currentUserIsSelf = (req.user._id === res.locals.user._id.toString());
+    next();
+  } catch (err) {
+    return next(err);
   }
 }

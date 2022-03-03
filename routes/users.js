@@ -129,28 +129,22 @@ router.put('/:userId',
   }
 );
 
-// TODO: DELETE
+// delete
 router.delete('/:userId',
   userController.validateObjectId,
   passport.authenticate('jwt', {session: false}),
+  authController.checkForAdmin,
+  userController.getOne,
+  userController.checkForSelf,
   async (req, res, next) => {
     try {
-      const user = await User.findById(req.params.userId).exec();
-
-      // 404 user not found
-      if (!user) {
-        const err = new Error('User not found');
-        err.status = 404;
-        throw err;
-      }
-
-      // check permission
+      // check permission: admin and self
       if (
-        req.user.roles.includes('admin') ||
-        req.user._id === user._id.toString()
+        res.locals.currentUserIsAdmin ||
+        res.locals.currentUserIsSelf
       ) {
         // allow it
-        await user.remove();
+        await res.locals.user.remove();
         res.status(204).send();
       } else {
         // 403

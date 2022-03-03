@@ -11,4 +11,14 @@ exports.authenticateAllowNonuser = (req, res, next) => {
       req.login(user, {session: false}, next);
     }
   })(req, res, next);
-}
+};
+
+exports.checkForAdmin = (req, res, next) => {
+  try {
+    // TODO: query the db instead!
+    res.locals.currentUserIsAdmin = req.user.roles.includes('admin');
+    next();
+  } catch (err) {
+    return next(err);
+  }
+};
