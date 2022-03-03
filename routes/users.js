@@ -88,22 +88,16 @@ router.get('/:userId',
 router.put('/:userId',
   userController.validateObjectId,
   passport.authenticate('jwt', {session: false}),
+  authController.checkForAdmin,
+  userController.getOne,
+  userController.checkForSelf,
   userController.validate(),
   async (req, res, next) => {
-    try { 
-      // allow signed in user OR admin to update user
-      const user = await User.findById(req.params.userId).exec();
-      
-      // 404 user not found
-      if (!user) {
-        const err = new Error('User not found');
-        err.status = 404;
-        throw err;
-      }
-      
+    try {
       // 403 no permission
-      if (req.user._id !== user._id.toString() &&
-        !req.user.roles.includes('admin')
+      if (
+        !res.locals.currentUserIsAdmin &&
+        !res.locals.currentUserIsSelf
       ) {
         const err = new Error('You do not have permission to update this user');
         err.status = 403;
@@ -111,6 +105,7 @@ router.put('/:userId',
       }
 
       // update permitted
+      const user = res.locals.user;
       user.username = req.body.username;
       user.password = req.body.password;
       user.displayName = req.body.displayname;
