@@ -6,13 +6,14 @@ const User = require('../models/user');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
-/* GET users listing. */
+/* GET all users - admin only */
 router.get('/',
   passport.authenticate('jwt', { session: false }),
+  authController.checkForAdmin,
   async (req, res, next) => {
     try {
       // check for admin role
-      if (!req.user.roles.includes('admin')) {
+      if (!res.locals.currentUserIsAdmin) {
         const err = new Error('You do not have permission to see all users');
         err.status = 403;
         throw err;
