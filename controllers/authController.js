@@ -1,5 +1,7 @@
 const passport = require('passport');
 
+const User = require('../models/user');
+
 exports.authenticateAllowNonuser = (req, res, next) => {
   passport.authenticate('jwt', {session: false}, (err, user, info) => {
     if (err) return next(err);
@@ -13,12 +15,15 @@ exports.authenticateAllowNonuser = (req, res, next) => {
   })(req, res, next);
 };
 
-exports.checkForAdmin = (req, res, next) => {
+exports.checkForAdmin = async (req, res, next) => {
   try {
-    // TODO: query the db instead!
+    // note: don't throw error if user is not authenticated. This
+    // middleware is used in endpoints that differentiate between
+    // admin/user/non-user.
     let result = false;
     if (req.user) {
-      result = req.user.roles.includes('admin');
+      const user = await User.findById(req.user._id).exec();
+      result = user.roles.includes('admin');
     }
     res.locals.currentUserIsAdmin = result;
     next();
