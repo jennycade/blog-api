@@ -130,5 +130,38 @@ router.put('/:userId',
 );
 
 // TODO: DELETE
+router.delete('/:userId',
+  userController.validateObjectId,
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.userId).exec();
+
+      // 404 user not found
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+      }
+
+      // check permission
+      if (
+        req.user.roles.includes('admin') ||
+        req.user._id === user._id.toString()
+      ) {
+        // allow it
+        await user.remove();
+        res.status(204).send();
+      } else {
+        // 403
+        const err = new Error('You do not have permission to delete this user');
+        err.status = 403;
+        throw err;
+      }
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 module.exports = router;
