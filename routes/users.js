@@ -59,9 +59,8 @@ router.get('/:userId',
         err.status = 404;
         throw err;
       }
-      const fields = ['displayName', 'roles'];
+      const fields = ['displayName', 'roles']; // TODO: createdAt, what else?
       // if logged in AND admin or self: retrieve username too
-      // TODO
       if (req.user) {
         if (
           req.user.roles.includes('admin') ||
@@ -109,6 +108,8 @@ router.put('/:userId',
       user.username = req.body.username;
       user.password = req.body.password;
       user.displayName = req.body.displayname;
+      //////////////////
+      // START HERE. WHY ISN'T DISPLAYNAME COMING THROUGH FROM THE BODY?
       const roles = [];
       if (req.body.iscommenter === 'true') roles.push('commenter');
       if (req.body.isauthor === 'true') roles.push('author');
