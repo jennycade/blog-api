@@ -53,20 +53,23 @@ router.get('/:userId',
 
   async (req, res, next) => {
     try {
-      const fields = ['displayName', 'roles']; // TODO: createdAt, what else?
-      // if logged in AND admin or self: retrieve username too
+      const fieldsToHide = ['password'];
+      // if not admin or self: hide username too
       if (
-        res.locals.currentUserIsAdmin ||
-        res.locals.currentUserIsSelf
+        !res.locals.currentUserIsAdmin &&
+        !res.locals.currentUserIsSelf
       ) {
-        fields.push('username');
+        fieldsToHide.push('username', 'updatedAt');
       }
-      const userToReturn = {
-        _id: res.locals.user._id,
-      };
-      fields.forEach(field => {
-        userToReturn[field] = res.locals.user[field];
-      });
+      const userObj = res.locals.user.toObject();
+      const userToReturn = {};
+
+      // filter out fields that should be hidden
+      for (const [field, value] of Object.entries(userObj)) {
+        if (!fieldsToHide.includes(field)) {
+          userToReturn[field] = value;
+        }
+      }
       
       res.json(userToReturn);
     } catch (err) {
