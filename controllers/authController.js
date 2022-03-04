@@ -31,3 +31,20 @@ exports.checkForAdmin = async (req, res, next) => {
     return next(err);
   }
 };
+
+exports.checkForAuthor = async (req, res, next) => {
+  try {
+    // note: don't throw error if user is not authenticated. This
+    // middleware is used in endpoints that differentiate between
+    // author/other user/non-user.
+    let result = false;
+    if (req.user) {
+      const user = await User.findById(req.user._id).exec();
+      result = user.roles.includes('author');
+    }
+    res.locals.currentUserIsAuthor = result;
+    next();
+  } catch (err) {
+    return next(err);
+  }
+};

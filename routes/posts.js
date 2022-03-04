@@ -7,21 +7,46 @@ const Post = require('../models/post');
 const Comment = require('../models/comment');
 
 const postController = require('../controllers/postController');
+const authController = require('../controllers/authController');
 
 // get all posts
-router.get('/', async (req, res, next) => {
-  try {
-    const posts = await Post
-      .find({ postStatus: 'published'})
-      .populate('author', '-password')
-      .sort('-createdAt')
-      .exec();
+router.get('/',
+  authController.authenticateAllowNonuser,
+  authController.checkForAdmin,
+  authController.checkForAuthor,
+  async (req, res, next) => {
+    try {
+      let postQuery;
+      // admin: everything
+      if (res.locals.currentUserIsAdmin) {
+        postQuery = {};
+      } else if (res.locals.currentUserIsAuthor) {
+      // authors: published OR author === self
+        postQuery = {
+          '$or': {
+            postStatus: 'published',
+            author: req.user._id,
+          }
+        }
+      } else {
+      // non-authors: published
+        postQuery = {
+          postStatus: 'published'
+        }
+      }
+      
+      const posts = await Post
+        .find(postQuery)
+        .populate('author', '-password')
+        .sort('-createdAt')
+        .exec();
 
-    res.json(posts);
-  } catch (err) {
-    return next(err);
+      res.json(posts);
+    } catch (err) {
+      return next(err);
+    }
   }
-});
+);
 
 // post a post!
 router.post('/', 
@@ -29,10 +54,12 @@ router.post('/',
 
   postController.validate(),
 
+  authController.checkForAuthor,
+
   async (req, res, next) => {
     try {
       // check for author role
-      if (!req.user.roles.includes('author')) {
+      if (!res.locals.currentUserIsAuthor) {
         const err = new Error('You do not have the author role');
         err.status = 403;
         throw err;
@@ -55,41 +82,36 @@ router.post('/',
 
 // get one post
 router.get('/:postId',
+  postController.validateObjectId,
+  postController.getOne,
+  authController.authenticateAllowNonuser,
+  authController.checkForAdmin,
+  postController.checkForSelf,
+
   async (req, res, next) => {
     try {
-      const post = await Post.findById(req.params.postId)
-        .populate('author', '-password')
-        .exec();
-      if (post.postStatus === 'published') {
-        res.json(post);
+      if (
+        res.locals.post.postStatus === 'published' ||
+        res.locals.currentUserIsAdmin ||
+        res.locals.currentUserIsSelf
+      ) {
+        res.json(res.locals.post);
       } else {
-        // need to authenticate. pass the post along.
-        res.locals.post = post;
-        next(null);
+        if (req.user) { // logged in
+          const err = new Error(`You do not have permission to view this post`);
+          err.status = 403;
+          throw err;
+        } else {
+          // not logged in
+          const err = new Error(`You are not logged in`);
+          err.status = 401;
+          throw err;
+        }
       }
     } catch (err) {
       return next(err);
     }
   },
-  // viewing a draft post requires validation
-  passport.authenticate('jwt', {session: false}),
-  async (req, res, next) => {
-    try {
-      // admin or post author
-      if (
-        req.user.roles.includes('admin') ||
-        req.user._id === res.locals.post.author._id.toString()
-      ) {
-        res.json(res.locals.post);
-      } else {
-        const err = new Error('You do not have permission to view this post');
-        err.status = 403;
-        throw err;
-      }
-    } catch (err) {
-      return next(err);
-    }
-  }
 );
 
 // get comments for post
