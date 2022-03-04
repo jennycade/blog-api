@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { body } = require('express-validator');
 
 const Post = require('../models/post');
 const Comment = require('../models/comment');
@@ -37,7 +36,7 @@ router.get('/',
       
       const posts = await Post
         .find(postQuery)
-        .populate('author', '-password')
+        .populate('author', '-password -username -updatedAt')
         .sort('-createdAt')
         .exec();
 
