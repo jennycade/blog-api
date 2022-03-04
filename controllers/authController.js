@@ -23,6 +23,11 @@ exports.checkForAdmin = async (req, res, next) => {
     let result = false;
     if (req.user) {
       const user = await User.findById(req.user._id).exec();
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err;
+      }
       result = user.roles.includes('admin');
     }
     res.locals.currentUserIsAdmin = result;
@@ -40,6 +45,11 @@ exports.checkForAuthor = async (req, res, next) => {
     let result = false;
     if (req.user) {
       const user = await User.findById(req.user._id).exec();
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        throw err; 
+      }
       result = user.roles.includes('author');
     }
     res.locals.currentUserIsAuthor = result;
