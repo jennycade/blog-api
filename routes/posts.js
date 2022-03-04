@@ -167,20 +167,23 @@ router.put('/:postId',
 
 // delete post
 router.delete('/:postId',
+  postController.validateObjectId,
 
   passport.authenticate('jwt', {session: false}),
 
+  postController.getOne,
+  authController.checkForAdmin,
+  postController.checkForSelf,
+
   async (req, res, next) => {
     try {
-      // find the post
-      const post = await Post.findById(req.params.postId).exec();
       // check - admin or post author?
       if (
-        req.user.roles.includes('admin') ||
-        req.user._id === post.author.toString()
+        res.locals.currentUserIsAdmin ||
+        res.locals.currentUserIsSelf
       ) {
         // allow deletion
-        await post.remove();
+        await res.locals.post.remove();
         res.status(204).send();
       } else {
         const err = new Error('You do not have permission to delete this post');
