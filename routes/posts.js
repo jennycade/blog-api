@@ -22,10 +22,10 @@ router.get('/',
       } else if (res.locals.currentUserIsAuthor) {
       // authors: published OR author === self
         postQuery = {
-          '$or': {
-            postStatus: 'published',
-            author: req.user._id,
-          }
+          '$or': [
+            {postStatus: 'published'},
+            {author: req.user._id},
+          ]
         }
       } else {
       // non-authors: published
@@ -114,34 +114,41 @@ router.get('/:postId',
 );
 
 // get comments for post
-router.get('/:postId/comments', async (req, res, next) => {
-  try {
-    const comments = await Comment.find({ post: req.params.postId })
-      .exec();
-    res.json(comments);
-  } catch (err) {
-    return next(err);
-  }
-});
+router.get('/:postId/comments',
+  postController.validateObjectId,
+  async (req, res, next) => {
+    try {
+      const comments = await Comment.find({ post: req.params.postId })
+        .exec();
+      res.json(comments);
+    } catch (err) {
+      return next(err);
+    }
+}
+);
 
 // update post
 router.put('/:postId', 
+  postController.validateObjectId,
+
+  passport.authenticate('jwt', {session: false}),
 
   // validate and sanitize
   postController.validate(),
 
-  passport.authenticate('jwt', {session: false}),
+  postController.getOne,
+  authController.checkForAdmin,
+  postController.checkForSelf,
 
   async (req, res, next) => {
     try {
-      // find the post
-      const post = await Post.findById(req.params.postId).exec();
-      // check - admin or post author?
+      // admin and authors can update
       if (
-        req.user.roles.includes('admin') ||
-        req.user._id === post.author.toString()
+        res.locals.currentUserIsAdmin ||
+        res.locals.currentUserIsSelf
       ) {
         // allow the update
+        const post = res.locals.post;
         post.title = req.body.title;
         post.text = req.body.text;
         post.postStatus = req.body.postStatus;
