@@ -35,23 +35,25 @@ router.get('/:commentId',
 
 // update a comment
 router.put('/:commentId',
+  commentController.validateObjectId,
+  commentController.getOne,
+
   passport.authenticate('jwt', {session: false}),
+
+  commentController.checkForSelf,
 
   commentController.validate(),
 
   async (req, res, next) => {
     try {
-      // check to make sure user is original author
-      const comment = await Comment.findById(req.params.commentId).exec();
-      if (comment.author.toString() !== req.user._id) {
-        const err = new Error('Only the comment author can update this comment');
-        err.status = 403;
-        throw err;
+      if (!res.locals.currentUserIsSelf) {
+        const err = new Error(`You do not have permission to update this comment`);
+        err.status = 404;
+        return next(err);
       }
       // update
+      const comment = res.locals.comment;
       comment.text = req.body.text;
-      comment.post = req.body.post;
-      // don't allow changing author
       const updatedComment = await comment.save();
       res.json(updatedComment);
     } catch (err) {
