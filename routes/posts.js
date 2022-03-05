@@ -190,9 +190,8 @@ router.delete('/:postId',
 const commentController = require('../controllers/commentController');
 
 // post a comment
-router.post('/:postId/comments/:commentId',
+router.post('/:postId/comments/',
   postController.validateObjectId,
-  commentController.validateObjectId,
 
   passport.authenticate('jwt', {session: false}),
 
