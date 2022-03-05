@@ -5,11 +5,12 @@ const passport = require('passport');
 const Comment = require('../models/comment');
 const commentController = require('../controllers/commentController');
 
-/* GET comments listing. */
+/* get all comments. */
 router.get('/', async (req, res, next) => {
   try {
     const comments = await Comment
       .find()
+      .populate('author', '-password -updatedAt -username')
       .sort('-createdAt')
       .exec();
 
@@ -19,23 +20,15 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// post a comment
-router.post('/',
-  passport.authenticate('jwt', {session: false}),
-
-  commentController.validate(),
-
-  async (req, res, next) => {
+// get one comment
+router.get('/:commentId', 
+  commentController.validateObjectId,
+  commentController.getOne,
+  (req, res, next) => {
     try {
-      // any user can comment, no need to check roles
-      const comment = await Comment.create({
-        text: req.body.text,
-        author: req.user._id,
-        post: req.body.post,
-      });
-      res.json(comment);
+      res.json(res.locals.comment);
     } catch (err) {
-      return next(err);
+      return next(err)
     }
   }
 );

@@ -113,20 +113,6 @@ router.get('/:postId',
   },
 );
 
-// get comments for post
-router.get('/:postId/comments',
-  postController.validateObjectId,
-  async (req, res, next) => {
-    try {
-      const comments = await Comment.find({ post: req.params.postId })
-        .exec();
-      res.json(comments);
-    } catch (err) {
-      return next(err);
-    }
-}
-);
-
 // update post
 router.put('/:postId', 
   postController.validateObjectId,
@@ -194,6 +180,51 @@ router.delete('/:postId',
       return next(err);
     }
   },
+);
+
+
+//////////////
+// COMMENTS //
+//////////////
+
+const commentController = require('../controllers/commentController');
+
+// post a comment
+router.post('/:postId/comments/:commentId',
+  postController.validateObjectId,
+  commentController.validateObjectId,
+
+  passport.authenticate('jwt', {session: false}),
+
+  commentController.validate(),
+
+  async (req, res, next) => {
+    try {
+      // any user can comment, no need to check roles
+      const comment = await Comment.create({
+        text: req.body.text,
+        author: req.user._id,
+        post: req.params.postId,
+      });
+      res.json(comment);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// get comments for post
+router.get('/:postId/comments',
+  postController.validateObjectId,
+  async (req, res, next) => {
+    try {
+      const comments = await Comment.find({ post: req.params.postId })
+        .exec();
+      res.json(comments);
+    } catch (err) {
+      return next(err);
+    }
+  }
 );
 
 module.exports = router;
