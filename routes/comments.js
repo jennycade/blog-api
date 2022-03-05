@@ -4,6 +4,7 @@ const passport = require('passport');
 
 const Comment = require('../models/comment');
 const commentController = require('../controllers/commentController');
+const authController = require('../controllers/authController');
 
 /* get all comments. */
 router.get('/', async (req, res, next) => {
@@ -64,26 +65,24 @@ router.put('/:commentId',
 
 // delete a comment
 router.delete('/:commentId',
+  commentController.validateObjectId,
   passport.authenticate('jwt', {session: false}),
+  commentController.getOne,
+  commentController.checkForSelf,
+  authController.checkForAdmin,
 
   async (req, res, next) => {
     try {
-      // check user: comment author OR admin
-      const comment = await Comment.findById(req.params.commentId).exec();
-      if (!comment) {
-        const err = new Error('Comment not found');
-        err.status = 404;
-        throw err;
-      }
-      if (!req.user.roles.includes('admin') &&
-        req.user._id !== comment.author.toString()
+      if (
+        !res.locals.currentUserIsSelf &&
+        !res.locals.currentUserIsAdmin
       ) {
         const err = new Error('You are not authorized to delete this comment');
         err.status = 403;
         throw err;
       } else {
         // delete it!
-        await comment.remove();
+        await res.locals.comment.remove();
         res.status(204).send(); // success, no body
       }
     } catch (err) {
