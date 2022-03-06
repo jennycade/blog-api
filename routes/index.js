@@ -14,6 +14,7 @@ router.post('/login', async (req, res, next) => {
         if (err || !user) {
           if (err) return next(err);
           const error = new Error('An error occurred while signing in.');
+          error.status = 401;
           return next(error);
         }
 
