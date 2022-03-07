@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config();
+const cors = require('cors');
 
 // import routes
 var postsRouter = require('./routes/posts');
@@ -21,11 +22,17 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// misc
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// cors
+app.use(cors({ origin: process.env.FRONTEND }));
+// app.use(cors());
+
 
 // mongoose
 mongoose.connect(
