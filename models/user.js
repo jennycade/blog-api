@@ -29,7 +29,21 @@ const UserSchema = new Schema(
       ],
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toObject: {
+      transform: (doc, ret, opt) => {
+        delete ret.password;
+        return ret;
+      }
+    },
+    toJSON: {
+      transform: (doc, ret, opt) => {
+        delete ret.password;
+        return ret;
+      }
+    },
+  },
 );
 
 // from https://www.digitalocean.com/community/tutorials/api-authentication-with-json-web-tokensjwt-and-passport
