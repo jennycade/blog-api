@@ -34,7 +34,12 @@ exports.validateObjectId = (req, res, next) => {
 exports.getOne = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.postId)
-      .populate('author', '-password -updatedAt -username')  
+      .populate('author', '-password -updatedAt -username')
+      .populate({
+        path: 'comments',
+        populate: { path: 'author', select: '-password -updatedAt -username' }
+      })  
+      .populate('numComments')
       .exec();
     
     // 404 post not found

@@ -36,7 +36,12 @@ router.get('/',
       
       const posts = await Post
         .find(postQuery)
-        .populate('author', '-password -username -updatedAt')
+        .populate('author', '-password -updatedAt -username')
+        .populate({
+          path: 'comments',
+          populate: { path: 'author', select: '-password -updatedAt -username' }
+        })
+        .populate('numComments')
         .sort('-createdAt')
         .exec();
 
