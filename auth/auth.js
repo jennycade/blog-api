@@ -23,15 +23,26 @@ passport.use(
         if (req.body.isauthor === 'true') roles.push('author');
         if (req.body.iscommenter === 'true') roles.push('commenter');
 
-        const user = await User.create(
-          {
-            username,
-            password,
-            displayName: req.body.displayname,
-            roles,
+        try {
+          const user = await User.create(
+            {
+              username,
+              password,
+              displayName: req.body.displayname,
+              roles,
+            }
+          );
+          return done(null, user);
+        } catch (err) {
+          const duplicateErrorMessage = 'E11000 duplicate key error collection: blog_api.users index: username';
+          if (err.message.includes(duplicateErrorMessage)) {
+            const duplicateErr = new Error('Username already in use');
+            duplicateErr.status = 400;
+            throw duplicateErr;
           }
-        );
-        return done(null, user); // TODO: remove password field
+          done(err);
+        }
+        
       } catch (err) {
         done(err);
       }
