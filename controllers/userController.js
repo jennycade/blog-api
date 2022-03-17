@@ -8,19 +8,23 @@ exports.validate = () => {
     body('username')
       .exists({checkFalsy: true}).withMessage('Username required')
       .isLength({max: 100}).withMessage('Maximum username length is 100 characters')
-      .trim().escape(),
+      // .trim().escape(),
+      .trim(),
     body('password')
       .exists({checkFalsy: true}).withMessage('Password required')
-      .trim().escape(),
+      // .trim().escape(),
+      .trim(),
     body('password2')
-      .escape(),
+      // .escape(),
+      ,
     body('displayname')
       .exists({checkFalsy: true}).withMessage('Display name required')
       .isLength({max: 100}).withMessage('Maximum display name length is 100 characters')
-      .trim().escape(),
-    body('isadmin').escape(),
-    body('isauthor').escape(),
-    body('iscommenter').escape(),
+      // .trim().escape(),
+      .trim(),
+    // body('isadmin').escape(),
+    // body('isauthor').escape(),
+    // body('iscommenter').escape(),
 
     validationController.throwValidationErrors,
   ]

@@ -8,13 +8,16 @@ exports.validate = () => {
     // validate and sanitize
     body('title')
       .exists().withMessage('Title required')
-      .escape().trim(),
+      // .escape().trim(),
+      .trim(),
     body('text')
       .exists().withMessage('Text required')
-      .escape().trim(),
+      // .escape().trim(),
+      .trim(),
     body('postStatus')
       .isIn(['draft', 'published']).withMessage('postStatus must be "draft" or "published"')
-      .escape(),
+      // .escape(),
+      ,
 
     validationController.throwValidationErrors,
   ];

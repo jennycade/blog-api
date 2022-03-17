@@ -7,7 +7,8 @@ exports.validate = () => {
   return [
     body('text')
       .exists({checkFalsy: true}).withMessage('Text required')
-      .trim().escape(),
+      // .trim().escape(),
+      .trim(),
     validationController.throwValidationErrors,
   ];
 };
