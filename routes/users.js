@@ -3,6 +3,8 @@ const passport = require('passport');
 var router = express.Router();
 
 const User = require('../models/user');
+const Post = require('../models/post');
+const Comment = require('../models/comment');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
@@ -144,6 +146,34 @@ router.delete('/:userId',
         err.status = 403;
         throw err;
       }
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// get user's posts
+router.get('/:userId/posts',
+  userController.validateObjectId,
+  async (req, res, next) => {
+    try {
+      const posts = await Post.find({ author: req.params.userId })
+        .exec();
+      res.json(posts);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// get user's comments
+router.get('/:userId/comments',
+  userController.validateObjectId,
+  async (req, res, next) => {
+    try {
+      const comments = await Comment.find({ author: req.params.userId })
+        .exec();
+      res.json(comments);
     } catch (err) {
       return next(err);
     }
