@@ -27,7 +27,8 @@ exports.validateObjectId = (req, res, next) => {
 exports.getOne = async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.commentId)
-      .populate('author', '-password -updatedAt -username')  
+      .populate('author', '-password -updatedAt -username') 
+      .populate('post') 
       .exec();
     
     // 404 post not found

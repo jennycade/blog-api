@@ -12,6 +12,7 @@ router.get('/', async (req, res, next) => {
     const comments = await Comment
       .find()
       .populate('author', '-password -updatedAt -username')
+      .populate('post')
       .sort('-createdAt')
       .exec();
 
