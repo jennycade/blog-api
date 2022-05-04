@@ -223,6 +223,7 @@ router.get('/:postId/comments',
   async (req, res, next) => {
     try {
       const comments = await Comment.find({ post: req.params.postId })
+        .populate('author', '-password -updatedAt -username')
         .exec();
       res.json(comments);
     } catch (err) {
