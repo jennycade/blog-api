@@ -158,7 +158,6 @@ router.get('/:userId/posts',
   async (req, res, next) => {
     try {
       const posts = await Post.find({ author: req.params.userId })
-        .populate('post')
         .exec();
       res.json(posts);
     } catch (err) {
