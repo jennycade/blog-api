@@ -24,7 +24,6 @@ exports.validate = () => {
       .trim(),
     // body('isadmin').escape(),
     // body('isauthor').escape(),
-    // body('iscommenter').escape(),
 
     validationController.throwValidationErrors,
   ]
