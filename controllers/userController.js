@@ -29,6 +29,32 @@ exports.validate = () => {
   ]
 };
 
+exports.validateWithoutPassword = () => {
+  return [
+    body('username')
+      .exists({checkFalsy: true}).withMessage('Username required')
+      .isLength({max: 100}).withMessage('Maximum username length is 100 characters')
+      .trim(),
+    body('displayname')
+      .exists({checkFalsy: true}).withMessage('Display name required')
+      .isLength({max: 100}).withMessage('Maximum display name length is 100 characters')
+      .trim(),
+
+    validationController.throwValidationErrors,
+  ]
+}
+
+exports.validatePassword = () => {
+  return [
+    body('oldpassword')
+      .exists({checkFalsy: true}).withMessage('Password required')
+      .trim(),
+    body('newpassword'),
+
+    validationController.throwValidationErrors,
+  ];
+}
+
 exports.validateObjectId = (req, res, next) => {
   const isValid = validationController.validateObjectId(req.params.userId);
   if (!isValid) {

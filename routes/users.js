@@ -88,7 +88,7 @@ router.put('/:userId',
   authController.checkForAdmin,
   userController.getOne,
   userController.checkForSelf,
-  userController.validate(),
+  userController.validateWithoutPassword(),
   async (req, res, next) => {
     try {
       // 403 no permission
@@ -104,7 +104,6 @@ router.put('/:userId',
       // update permitted
       const user = res.locals.user;
       user.username = req.body.username;
-      user.password = req.body.password;
       user.displayName = req.body.displayname;
       
       const roles = [];
@@ -120,6 +119,46 @@ router.put('/:userId',
     }
   }
 );
+
+// update password
+router.put('/:userId/password', () => {
+  userController.validateObjectId,
+  passport.authenticate('jwt', {session: false}),
+  userController.getOne,
+  userController.checkForSelf,
+  userController.validatePassword(),
+  async (req, res, next) => {
+    try {
+      // 403 no permission
+      if (
+        !res.locals.currentUserIsSelf
+      ) {
+        const err = new Error('You do not have permission to update this user');
+        err.status = 403;
+        throw err;
+      }
+
+      // update permitted
+      const user = res.locals.user;
+      
+      // check password
+      const passwordIsValid = await user.isValidPassword(req.body.oldpassword);
+      if (!passwordIsValid) {
+        const err = new Error('Old password incorrect');
+        err.status = 400;
+        throw err;
+      }
+
+      user.password = req.body.newpassword;
+      
+      const updatedUser = await user.save();
+      res.json(updatedUser);
+
+    } catch (err) {
+      return next(err);
+    }
+  }
+});
 
 // delete
 router.delete('/:userId',
