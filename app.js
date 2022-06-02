@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config();
 const cors = require('cors');
+const compression = require('compression');
+const helmet = require('helmet');
 
 // import routes
 var postsRouter = require('./routes/posts');
@@ -23,14 +25,16 @@ var app = express();
 // app.set('view engine', 'pug');
 
 // misc
+app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(compression());
 
 // cors
-app.use(cors({ origin: process.env.FRONTEND }));
+app.use(cors({ origin: [process.env.FRONTEND, process.env.ADMIN_FRONTEND] }));
 
 // mongoose
 mongoose.connect(
